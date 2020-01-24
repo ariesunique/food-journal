@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			&nbsp;
+		</div>
+	</div>
+	<div class="row" align-items-center>
+
+		<div class="col-md-12">
+			<h3 align="center">
+				Look what I made
+			</h3>
+		</div>
+
+	</div>
+	
+	<div class="row">
+		<div class="col-md-4">
+			<button id="slider-left" type="button" class="btn btn-info">
+				Left
+			</button>
+			 
+		</div>
+		<div class="col-md-4">
+			
+			<div class="slider-wrap">
+				<div class="slide-wrap">
+					{% for fooditem in foodList: %}
+					{% if  fooditem.id == id %}
+					<div id="slide{{id}}" class="slider-slide-wrap shown">
+					{% else %}
+					<div id="slide{{id}}" class="slider-slide-wrap">
+					{% endif %}
+						{{ fooditem.id }} {{ fooditem.title }} </br> {{ fooditem.comment }}
+						<img alt="Bootstrap Image Preview" src="https://www.layoutit.com/img/sports-q-c-140-140-3.jpg" />
+					</div>
+					
+					{% endfor %}
+				</div>
+			</div>			
+
+		</div>
+		<div class="col-md-4">
+			<button id="slider-right" type="button" class="btn btn-info">
+				Right
+			</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<a class="navbar-brand" href="{{ url_for('public.add_dish') }}">
+			<button type="button" class="btn btn-success" align="center">
+				Add Dish
+			</button>
+			</a>
+		</div>
+	</div>		
+</div>
+
+{% endblock %}
