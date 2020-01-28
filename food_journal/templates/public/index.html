@@ -1,9 +1,8 @@
-{% extends "layout.html" %}
-{% block content %}
+{% extends "layout.html" %} {% block content %}
 
 
 
-<div class="container-fluid">
+<div class="container">
 	<div class="row">
 		<div class="col-md-12">
 			&nbsp;
@@ -16,50 +15,48 @@
 				Look what I made
 			</h3>
 		</div>
-
 	</div>
-	
+
 	<div class="row">
-		<div class="col-md-4">
-			<button id="slider-left" type="button" class="btn btn-info">
-				Left
-			</button>
-			 
-		</div>
-		<div class="col-md-4">
-			
-			<div class="slider-wrap">
-				<div class="slide-wrap">
-					{% for fooditem in foodList: %}
-					{% if  fooditem.id == id %}
-					<div id="slide{{id}}" class="slider-slide-wrap shown">
+
+		<div class="col-md-6 offset-md-3 col-sm-12">
+
+			<div id="foodjournal-carousel" class="carousel slide bg-primary" data-ride="carousel" data-interval="false" style="">
+				<div class="carousel-inner">
+					{% for food in foodList: %}
+					{% if loop.index == foodList|length: %}
+					<div class="carousel-item active">
 					{% else %}
-					<div id="slide{{id}}" class="slider-slide-wrap">
+					<div class="carousel-item">
 					{% endif %}
-						{{ fooditem.id }} {{ fooditem.title }} </br> {{ fooditem.comment }}
-						<img alt="Bootstrap Image Preview" src="https://www.layoutit.com/img/sports-q-c-140-140-3.jpg" />
+						<img class="d-block my-0 mx-auto foodjournal-picture" src="" alt="">
+						<div class="carousel-caption d-none d-md-block">
+							<h5>{{food.title}}</h5>
+							<p>{{food.comment}}</p>
+						</div>
 					</div>
-					
 					{% endfor %}
 				</div>
-			</div>			
+				<a class="carousel-control-prev" href="#foodjournal-carousel" role="button" data-slide="prev">
+			<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+			<span class="sr-only">Previous</span>
+		  </a>
+				<a class="carousel-control-next" href="#foodjournal-carousel" role="button" data-slide="next">
+			<span class="carousel-control-next-icon" aria-hidden="true"></span>
+			<span class="sr-only">Next</span>
+		  </a>
+			</div>
 
 		</div>
-		<div class="col-md-4">
-			<button id="slider-right" type="button" class="btn btn-info">
-				Right
-			</button>
-		</div>
 	</div>
+
 	<div class="row">
-		<div class="col-md-12">
-			<a class="navbar-brand" href="{{ url_for('public.add_dish') }}">
-			<button type="button" class="btn btn-success" align="center">
+		<div class="col-12 text-center">
+			<a class="navbar-brand btn btn-success my-2" href="{{ url_for('public.add_dish') }}">
 				Add Dish
-			</button>
 			</a>
 		</div>
-	</div>		
+	</div>
 </div>
 
 {% endblock %}

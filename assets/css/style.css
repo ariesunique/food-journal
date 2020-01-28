@@ -87,39 +87,27 @@ footer .footer-nav {
 
 /* jquery scroll */
 
-.slider-wrap {
-    position: relative;
-    width: 100%;
-    height: 230px;
-    overflow-y:hidden;
-    overflow-x:scroll;
-    margin-top: 20px;
-}
-.slider-nav {
-    position: absolute;
-    margin-top: -125px;
-    width: 30px;
-    height: 30px;
-    background-color: rgba(0, 0, 0, 0.5);
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    cursor: pointer;
-    z-index: 4;
+#foodjournal-carousel {
+   height: 400px;
 }
 
-.slide-wrap {
-    position: relative;
-    height: 200px;
+.foodjournal-picture{
+   height:400px;
+   width: auto;
+}
+
+.carousel-caption {
+    
+}
+
+.carousel-caption::after {
+    content: "";
+    background-color: black;
+    opacity: 0.5;
+    position: absolute;
     top: 0;
     left: 0;
-}
-.slider-slide-wrap {
-    position: absolute;
-    width: 680px;
-    height: 100%;
-    background-color: pink;
-}
-.slider-slide-wrap:nth-child(even) {
-    background-color: red;
+    bottom: 0;
+    right: 0;
+    z-index: -1;    
 }
