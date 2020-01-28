@@ -4,7 +4,7 @@
 <div class="container-narrow">
   <h1 class="mt-5">Add Dish</h1>
     <br/>
-    <form id="addDishForm" class="form" method="POST" action="" role="form">
+    <form id="addDishForm" class="form" method="POST" enctype="multipart/form-data" action="{{ url_for('public.add_dish') }}" role="form" >
            {{ form.csrf_token }}
             <div class="form-group">
                 {{form.title.label}}

@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 """Public forms."""
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, FileField, TextAreaField
+from flask_wtf.file import  FileRequired, FileAllowed
+from flask_uploads import UploadSet, IMAGES
+from wtforms import PasswordField, StringField, TextAreaField, FileField
 from wtforms.validators import DataRequired, Regexp
 
 from food_journal.user.models import User
 
 class FoodForm(FlaskForm):
     """Food form."""
+    images = UploadSet('images', IMAGES)
+    
     title = StringField("Title", validators=[DataRequired()])
-    image = FileField(u'Image File')
-    #image = FileField(u'Image File', validators=[Regexp(u'^[^/\\]\.jpg$')])
+    image = FileField('Image', validators=[FileAllowed(images, 'Images only!')])
     #tags = ""
     comment = TextAreaField(u'Image Description')
     #submit = ""
+    
+    def __repr__(self):
+        str = super(FoodForm, self).__repr__
+        return "{}\nTitle: {}; Image: {}".format(str, self.title.data, self.image.data)
 
 class LoginForm(FlaskForm):
     """Login form."""
