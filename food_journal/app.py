@@ -25,6 +25,7 @@ def create_app(config_object="food_journal.settings"):
     """
     app = Flask(__name__.split(".")[0])
     app.config.from_object(config_object)
+    #print(app.config)
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
@@ -52,18 +53,18 @@ def register_blueprints(app):
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
     return None
-
+ 
 
 def register_errorhandlers(app):
     """Register error handlers."""
-
+    
     def render_error(error):
         """Render error template."""
         # If a HTTPException, pull the `code` attribute; default to 500
         error_code = getattr(error, "code", 500)
         return render_template(f"{error_code}.html"), error_code
 
-    for errcode in [401, 404, 500]:
+    for errcode in [401, 404, 413, 500]:
         app.errorhandler(errcode)(render_error)
     return None
 

@@ -25,6 +25,7 @@ import os
 import boto3
 import requests
 import random
+import tempfile
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -77,26 +78,32 @@ def add_dish():
     """Add a new image"""
     #current_app.logger.info("bucket from config is: {}".format( current_app.config["BUCKET_NAME"]) )
     BUCKET = current_app.config["S3_BUCKET_NAME"]
-    form = FoodForm(request.form)
+    
+    form = FoodForm()
     
     
     if form.validate_on_submit():
         
-        current_app.logger.info("User is attempting to add a dish.")
+        #current_app.logger.info("User is attempting to add a dish.")
         
-        current_app.logger.info(form)      
+        #current_app.logger.info(form)      
         
-        if request.files:
-            image = request.files["image"]     
-            current_app.logger.info(image)
+        if form.image.data:
+            #image = request.files["image"]     
+            image = form.image.data
+            #current_app.logger.info(image)
             
             filename = secure_filename(image.filename)
-            full_filename = os.path.join(current_app.instance_path, filename)
-            current_app.logger.info("Filename: {}".format( full_filename))
             
-            image.save(full_filename)
-            aws_image_object_name =  "{}-{}".format( random.randint(1111,9999), filename)
-            upload_file(full_filename, BUCKET, aws_image_object_name )
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                current_app.logger.info("Inside temp dir {}".format(tmpdirname))
+                                
+                full_filename = os.path.join(tmpdirname, filename)
+                current_app.logger.info("Filename: {}".format( full_filename))
+            
+                image.save(full_filename)
+                aws_image_object_name =  "{}-{}".format( random.randint(1111,9999), filename)
+                upload_file(full_filename, BUCKET, aws_image_object_name )
 
         fooditem = FoodItem.create(
             title=form.title.data,
