@@ -134,7 +134,7 @@ def upload_file(full_path, bucket, filename):
     """
     #object_name = filename
     s3_client = boto3.client('s3')
-    response = s3_client.upload_file(full_path, bucket, filename)
+    response = s3_client.upload_file(full_path, bucket, filename, ExtraArgs={'ACL': 'public-read'})
     #current_app.logger.info("AWS response", response)
 
     return response
