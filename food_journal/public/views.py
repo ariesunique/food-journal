@@ -81,7 +81,10 @@ def add_dish():
             comment=form.comment.data,
             image = form.image.data
         )                       
-        flash("Thank you for adding a dish.", "success")
+        if fooditem.persistent:
+            flash("Thank you for adding a dish.", "success")
+        else:
+            flash("Sorry, there was an error uploading your image. Please try again later.", "danger")
         return redirect(url_for("public.index"))
     else:
         flash_errors(form)

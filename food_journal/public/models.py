@@ -8,6 +8,8 @@ import requests
 import random
 import tempfile
 
+from botocore.exceptions import ClientError, ParamValidationError
+
 from flask import current_app
 
 from flask_login import UserMixin
@@ -39,7 +41,11 @@ class AWS_Mixin(object):
                 s3_client = boto3.client('s3')
                 try:
                     response = s3_client.upload_file(full_filename, BUCKET, aws_image_object_name, ExtraArgs={'ACL': 'public-read'})
-                except ClientError:
+                except ParamValidationError as e:
+                    current_app.logger.error("ParamValidationError caught!!", e)
+                    return False
+                except ClientError as e:
+                    current_app.logger.error("ClientError caught!!", e)
                     return False
         return True
     
@@ -51,12 +57,18 @@ class AWS_Mixin(object):
         If the upload is unsuccessful, remove the item from the session.
         This should prevent orphaned images on S3.
         """
+        #current_app.logger.info("BEFORE COMMIT")
         for model in list(session.new):
             if isinstance(model, AWS_Mixin):
                 sent_to_s3 = AWS_Mixin.upload_to_s3(model)
                 if not sent_to_s3:
-                    session.remove(model)
-                
+                    #current_app.logger.info("SEND TO S3 FAILED - REMOVING OBJ FROM SESSION")
+                    session.expunge(model)
+                    # setting this field to signal to the UI (view) that we did not save this obj
+                    model.persistent = False
+                else:
+                    # setting this field to true since the view will be looking for it (see the note above)
+                    model.persistent = True
 
 
 
