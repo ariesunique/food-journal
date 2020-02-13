@@ -10,7 +10,7 @@ from flask import (
     url_for,
     Response,
 )
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 
 from food_journal.extensions import login_manager
 from food_journal.public.forms import LoginForm, FoodForm
@@ -36,8 +36,11 @@ def load_user(user_id):
 def index():
     form = LoginForm()
 
-    # arbitrarily limiting num results to 20 -- FIX ME
-    foodList = FoodItem.query.all()
+    if current_user and current_user.is_authenticated:
+        foodList = current_user.food_items.order_by(FoodItem.created_at.desc()).all()
+    else:
+        # arbitrarily limiting num results to 20 -- FIX ME
+        foodList = FoodItem.query.order_by(FoodItem.created_at.desc()).all()    
 
     return render_template("public/index.html", form=form, foodList=foodList)
 
@@ -48,7 +51,7 @@ def logout():
     """Logout."""
     logout_user()
     flash("You are logged out.", "info")
-    return redirect(url_for("public.home"))
+    return redirect(url_for("public.index"))
 
 
 @blueprint.route("/register/", methods=["GET", "POST"])
@@ -79,7 +82,8 @@ def add_dish():
         fooditem = FoodItem.create(
             title=form.title.data,
             comment=form.comment.data,
-            image = form.image.data
+            image = form.image.data,
+            author= current_user
         )                       
         if fooditem.persistent:
             flash("Thank you for adding a dish.", "success")
