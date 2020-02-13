@@ -1,5 +1,12 @@
 """Food models"""
 import datetime as dt
+from werkzeug.utils import secure_filename
+
+import os
+import boto3
+import requests
+import random
+import tempfile
 
 from flask import current_app
 
@@ -14,9 +21,51 @@ from food_journal.database import (
     relationship,
 )
 
+class AWS_Mixin(object):
+    @classmethod
+    def upload_to_s3(cls, model):
+        current_app.logger.info("SENDINGTO S3")
+        BUCKET = current_app.config["S3_BUCKET_NAME"]
+        for field in model.__sendtos3__:
+            obj = getattr(model, field)
+            filename = secure_filename(obj.filename)
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                full_filename = os.path.join(tmpdirname, filename)
+                #current_app.logger.info("Filename: {}".format( full_filename))
+                obj.save(full_filename)
+                aws_image_object_name =  "{}-{}".format( random.randint(1111,9999), filename)
+                model.aws_key = aws_image_object_name
 
-class FoodItem(SurrogatePK, Model):
+                s3_client = boto3.client('s3')
+                try:
+                    response = s3_client.upload_file(full_filename, BUCKET, aws_image_object_name, ExtraArgs={'ACL': 'public-read'})
+                except ClientError:
+                    return False
+        return True
+    
+    
+    @classmethod
+    def before_commit(cls, session):
+        """
+        Before we commit, attempt to save the image to the S3 bucket.
+        If the upload is unsuccessful, remove the item from the session.
+        This should prevent orphaned images on S3.
+        """
+        for model in list(session.new):
+            if isinstance(model, AWS_Mixin):
+                sent_to_s3 = AWS_Mixin.upload_to_s3(model)
+                if not sent_to_s3:
+                    session.remove(model)
+                
+
+
+
+class FoodItem(SurrogatePK, Model, AWS_Mixin):
     """Store an actual dish the user uploads"""
+    
+    # list of fields containing data that should be uploaded to s3
+    __sendtos3__ = ['image']
+    
     __tablename__ = "food"
     title = Column(db.String(80), nullable=False)
     aws_key = Column(db.String(100), nullable=False, unique=True)
@@ -30,10 +79,15 @@ class FoodItem(SurrogatePK, Model):
         return current_app.config["S3_OBJECT_URL_TEMPLATE"].format(current_app.config["S3_BUCKET_NAME"], self.aws_key) 
 
     
-    def __init__(self, title, **kwargs):
+    def __init__(self, title, image=None, **kwargs):
         """Create instance."""
+        self.image = image 
         db.Model.__init__(self, title=title, **kwargs)
+        
 
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<FoodItem({self.title})>"  
+    
+    
+db.event.listen(db.session, 'before_commit', AWS_Mixin.before_commit)

@@ -18,14 +18,9 @@ from food_journal.user.forms import RegisterForm
 from food_journal.user.models import User
 from food_journal.public.models import FoodItem
 from food_journal.utils import flash_errors
+from food_journal.database import db
 
 from werkzeug.utils import secure_filename
-
-import os
-import boto3
-import requests
-import random
-import tempfile
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 
@@ -39,8 +34,9 @@ def load_user(user_id):
 @blueprint.route("/")
 @blueprint.route("/index")
 def index():
-    form = LoginForm(request.form)
-    # arbitrarily limiting num results to 20 
+    form = LoginForm()
+
+    # arbitrarily limiting num results to 20 -- FIX ME
     foodList = FoodItem.query.all()
 
     return render_template("public/index.html", form=form, foodList=foodList)
@@ -75,51 +71,16 @@ def register():
 
 @blueprint.route("/add/", methods=["GET", "POST"])
 def add_dish():
-    """Add a new image"""
-    #current_app.logger.info("bucket from config is: {}".format( current_app.config["BUCKET_NAME"]) )
-    BUCKET = current_app.config["S3_BUCKET_NAME"]
-    
+    """Add a new image"""    
     form = FoodForm()
     
-    
     if form.validate_on_submit():
-        
-        #current_app.logger.info("User is attempting to add a dish.")
-        
-        #current_app.logger.info(form)      
-        
-        if form.image.data:
-            #image = request.files["image"]     
-            image = form.image.data
-            #current_app.logger.info(image)
-            
-            filename = secure_filename(image.filename)
-            
-            with tempfile.TemporaryDirectory() as tmpdirname:
-                current_app.logger.info("Inside temp dir {}".format(tmpdirname))
-                                
-                full_filename = os.path.join(tmpdirname, filename)
-                current_app.logger.info("Filename: {}".format( full_filename))
-            
-                image.save(full_filename)
-                aws_image_object_name =  "{}-{}".format( random.randint(1111,9999), filename)
-                upload_file(full_filename, BUCKET, aws_image_object_name )
 
         fooditem = FoodItem.create(
             title=form.title.data,
             comment=form.comment.data,
-            aws_key=aws_image_object_name
-        )              
-            
-        #fooditem.aws_image_object_name = aws_image_object_name
-        #fooditem.update()
-        
-        #filename = secure_filename(form.image.data.filename)
-        #full_filename = os.path.join(app.instance_path, 'photos', filename)
-        #f.save(full_filename)
-        #upload_file(full_filename, BUCKET)
-        
-
+            image = form.image.data
+        )                       
         flash("Thank you for adding a dish.", "success")
         return redirect(url_for("public.index"))
     else:
@@ -127,35 +88,22 @@ def add_dish():
     return render_template("public/add-dish.html", form=form)
 
 
-def upload_file(full_path, bucket, filename):
-    """
-    TODO - this should probably be moved
-    Function to upload a file to an S3 bucket
-    """
-    #object_name = filename
-    s3_client = boto3.client('s3')
-    response = s3_client.upload_file(full_path, bucket, filename, ExtraArgs={'ACL': 'public-read'})
-    #current_app.logger.info("AWS response", response)
 
-    return response
 
-# -----------------------
-#Old stuff that I don't need anymore
-@blueprint.route("/old", methods=["GET", "POST"])
-def home():
+@blueprint.route("/login", methods=["GET", "POST"])
+def login():
     """Home page."""
-    form = LoginForm(request.form)
-    current_app.logger.info("Hello from the home page!")
-    # Handle logging in
-    if request.method == "POST":
-        if form.validate_on_submit():
-            login_user(form.user)
-            flash("You are logged in.", "success")
-            redirect_url = request.args.get("next") or url_for("user.members")
-            return redirect(redirect_url)
-        else:
-            flash_errors(form)
-    return render_template("public/home.html", form=form)
+    form = LoginForm()
+
+    # Handle logging in 
+    if form.validate_on_submit():
+        login_user(form.user)
+        flash("You are logged in.", "success")
+        redirect_url = request.args.get("next") or url_for("public.index")
+        return redirect(redirect_url)
+    else:
+        flash_errors(form)
+    return redirect(url_for('public.index'))
 
 
 @blueprint.route("/about/")
