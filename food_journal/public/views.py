@@ -66,7 +66,7 @@ def register():
             active=True,
         )
         flash("Thank you for registering. You can now log in.", "success")
-        return redirect(url_for("public.home"))
+        return redirect(url_for("public.index"))
     else:
         flash_errors(form)
     return render_template("public/register.html", form=form)
