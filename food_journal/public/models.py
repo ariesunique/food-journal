@@ -5,7 +5,6 @@ from werkzeug.utils import secure_filename
 import os
 import boto3
 import requests
-import random
 import tempfile
 
 from botocore.exceptions import ClientError, ParamValidationError
@@ -33,9 +32,12 @@ class AWS_Mixin(object):
             filename = secure_filename(obj.filename)
             with tempfile.TemporaryDirectory() as tmpdirname:
                 full_filename = os.path.join(tmpdirname, filename)
-                #current_app.logger.info("Filename: {}".format( full_filename))
                 obj.save(full_filename)
-                aws_image_object_name =  "{}-{}".format( random.randint(1111,9999), filename)
+                
+                if model.__aws_key_prefix__:
+                    aws_image_object_name = model.__aws_key_prefix__ + "/" + filename
+                else:
+                    aws_image_object_name = filename
                 model.aws_key = aws_image_object_name
 
                 s3_client = boto3.client('s3')
@@ -75,8 +77,9 @@ class AWS_Mixin(object):
 class FoodItem(SurrogatePK, Model, AWS_Mixin):
     """Store an actual dish the user uploads"""
     
-    # list of fields containing data that should be uploaded to s3
+    # list of fields containing data that should be uploaded to s3; if the class extends AWS_Mixin, it must also include the list of fields to send to AWS
     __sendtos3__ = ['image']
+  
     
     __tablename__ = "food"
     title = Column(db.String(80), nullable=False)
@@ -90,6 +93,11 @@ class FoodItem(SurrogatePK, Model, AWS_Mixin):
         # file should be formatted as follows: https://{bucket_name}.s3.amazonaws.com/{self.aws_key}"
         return current_app.config["S3_OBJECT_URL_TEMPLATE"].format(current_app.config["S3_BUCKET_NAME"], self.aws_key) 
 
+    @property
+    def __aws_key_prefix__(self):
+        # if the objects should be prepended with a prefix before going into the AWS bucket
+        # Note - author is a backref defined in the User model
+        return self.author.username
     
     def __init__(self, title, image=None, **kwargs):
         """Create instance."""
@@ -100,6 +108,7 @@ class FoodItem(SurrogatePK, Model, AWS_Mixin):
     def __repr__(self):
         """Represent instance as a unique string."""
         return f"<FoodItem({self.title})>"  
+    
     
     
 db.event.listen(db.session, 'before_commit', AWS_Mixin.before_commit)
