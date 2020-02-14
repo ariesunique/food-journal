@@ -3,24 +3,18 @@
 
 
 <div class="container">
-	<div class="row">
-		<div class="col-md-12">
-			&nbsp;
-		</div>
-	</div>
+	
+	{% if foodList %}
 	<div class="row" align-items-center>
-
 		<div class="col-md-12">
-			<h3 align="center">
+			<h3 class="mt-5" align="center">
 				Look what I made
 			</h3>
 		</div>
 	</div>
 
 	<div class="row">
-
 		<div class="col-md-6 offset-md-3 col-sm-12">
-
 			<div id="foodjournal-carousel" class="carousel slide bg-primary" data-ride="carousel" data-interval="false" style="">
 				<div class="carousel-inner">
 					{% for food in foodList: %}
@@ -60,6 +54,27 @@
 		</div>
 	</div>
 	{% endif %}
+	
+	{% else %}
+	<div class="row">
+		<div class="col-md-12">
+			<h1 class="mt-5" >
+				Welcome to Food Journal
+			</h1>
+			<p class="lead">
+				<br>Use this site to keep track of your awesome food creations! <br><br>
+				{% if current_user and current_user.is_authenticated %}
+				You have not uploaded any food images yet. Click the button below to get started! <br><br>
+				<a class="navbar-brand btn btn-success my-2" href="{{ url_for('public.add_dish') }}">Add Dish</a>
+				{% else %}
+				Looks like no one has uploaded any food images yet. <br>You can be the first!<br><br>
+				<a href="{{ url_for('public.login') }}">Login</a> or <a href="{{ url_for('public.register') }}">register</a> to get started.
+				{% endif %}
+			</p>
+		</div>
+	</div>
+	{% endif %}
+		
 </div>
 
 {% endblock %}
