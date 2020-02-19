@@ -15,6 +15,7 @@ from food_journal.extensions import (
     flask_static_digest,
     login_manager,
     migrate,
+    moment,
 )
 
 
@@ -45,6 +46,7 @@ def register_extensions(app):
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
+    moment.init_app(app)
     return None
 
 
