@@ -87,6 +87,7 @@ class FoodItem(SurrogatePK, Model, AWS_Mixin):
     comment = Column(db.String(200))
     created_at = Column(db.DateTime, index=True, nullable=False, default=dt.datetime.utcnow)
     user_id = Column(db.Integer, db.ForeignKey('users.id'))
+    is_public = Column(db.Boolean, default=True)
     
     @property
     def aws_url(self):

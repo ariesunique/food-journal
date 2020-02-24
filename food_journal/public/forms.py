@@ -2,7 +2,7 @@
 """Public forms."""
 from flask_wtf import FlaskForm
 from flask_wtf.file import  FileField, FileRequired, FileAllowed
-from wtforms import PasswordField, StringField, TextAreaField
+from wtforms import PasswordField, StringField, TextAreaField, BooleanField
 from wtforms.validators import DataRequired, Regexp
 
 from food_journal.user.models import User
@@ -15,7 +15,7 @@ class FoodForm(FlaskForm):
     image = FileField('Image', validators=[FileRequired(), FileAllowed(ALLOWED_EXTENSIONS, 'Images only!')])
     #tags = ""
     comment = TextAreaField(u'Image Description')
-    #submit = ""
+    is_public = BooleanField('Make this image public', default="checked")
     
     def __repr__(self):
         str = super(FoodForm, self).__repr__

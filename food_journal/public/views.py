@@ -51,7 +51,7 @@ def index():
         foodList = current_user.food_items.order_by(FoodItem.created_at.desc()).all()
     else:
         # arbitrarily limiting num results to 20 -- FIX ME
-        foodList = FoodItem.query.order_by(FoodItem.created_at.desc()).all()    
+        foodList = FoodItem.query.filter_by(is_public=True).order_by(FoodItem.created_at.desc()).all()    
 
     return render_template("public/index.html", form=form, foodList=foodList)
 
@@ -94,7 +94,8 @@ def add_dish():
             title=form.title.data,
             comment=form.comment.data,
             image = form.image.data,
-            author= current_user
+            author= current_user,
+            is_public = form.is_public.data
         )                       
         if fooditem.persistent:
             flash("Thank you for adding a dish.", "success")

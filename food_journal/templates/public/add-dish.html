@@ -19,6 +19,10 @@
                 {{form.comment.label}}
                 {{form.comment(placeholder="Comment", class_="form-control")}}
             </div>
+            <div class="form-group">
+                {{form.is_public.label}}
+                {{form.is_public(placeholder="Make this image public?", class_="form-control")}}
+            </div>
             <p>
                 <input class="btn btn-primary" type="submit" value="Add your dish">
             </p>
