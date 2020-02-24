@@ -22,7 +22,18 @@ from food_journal.database import db
 
 from werkzeug.utils import secure_filename
 
+from datetime import datetime
+
+
 blueprint = Blueprint("public", __name__, static_folder="../static")
+
+
+
+@blueprint.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
 
 
 @login_manager.user_loader

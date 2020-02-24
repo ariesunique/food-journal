@@ -14,6 +14,8 @@ from food_journal.database import (
 )
 from food_journal.extensions import bcrypt
 
+from hashlib import md5
+
 
 class Role(SurrogatePK, Model):
     """A role for a user."""
@@ -45,6 +47,8 @@ class User(UserMixin, SurrogatePK, Model):
     last_name = Column(db.String(30), nullable=True)
     active = Column(db.Boolean(), default=False)
     is_admin = Column(db.Boolean(), default=False)
+    about_me = Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=dt.datetime.utcnow)
     food_items = db.relationship("FoodItem", backref="author", lazy="dynamic")
 
     def __init__(self, username, email, password=None, **kwargs):
@@ -63,6 +67,11 @@ class User(UserMixin, SurrogatePK, Model):
         """Check password."""
         return bcrypt.check_password_hash(self.password, value)
 
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
+        
     @property
     def full_name(self):
         """Full user name."""

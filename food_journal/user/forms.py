@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField
+from wtforms import PasswordField, StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 from .models import User
 
+
+class EditProfileForm(FlaskForm):
+    about_me = TextAreaField('About Me', validators=[Length(min=0, max=140)])
+    submit = SubmitField('submit')
+    
 
 class RegisterForm(FlaskForm):
     """Register form."""
