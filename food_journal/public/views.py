@@ -48,7 +48,8 @@ def index():
     form = LoginForm()
 
     if current_user and current_user.is_authenticated:
-        foodList = current_user.food_items.order_by(FoodItem.created_at.desc()).all()
+        #foodList = current_user.food_items.order_by(FoodItem.created_at.desc()).all()
+        foodList = current_user.followed_food_items().all()
     else:
         # arbitrarily limiting num results to 20 -- FIX ME
         foodList = FoodItem.query.filter_by(is_public=True).order_by(FoodItem.created_at.desc()).all()    

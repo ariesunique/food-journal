@@ -21,6 +21,14 @@
         <p>
             <a href="{{ url_for('user.edit_profile') }}">Edit your profile</a>
         </p>
+        {% elif not current_user.is_following(user) %}
+        <p>
+            <a href="{{ url_for('user.follow', username=user.username) }}">Follow</a>
+        </p>
+        {% else %}
+        <p>
+            <a href="{{ url_for('user.unfollow', username=user.username) }}">Unfollow</a>
+        </p>
         {% endif %}
     </div>
 {% endblock %}
